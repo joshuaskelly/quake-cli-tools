@@ -2,7 +2,7 @@
 
 # quake-cli-tools
 
-[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)]()
+[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)]() [![PyPI version](https://badge.fury.io/py/quake-cli-tools.svg)](https://pypi.python.org/pypi/quake-cli-tools)
 
 quake-cli-tools is a set of command line tools for creating Quake content.
 
