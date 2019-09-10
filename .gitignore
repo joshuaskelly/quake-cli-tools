@@ -1,0 +1,20 @@
+# Ignore IDE files
+.idea
+.vscode
+.vs
+/vs
+*.pyproj
+
+# Ignore PyPi artifacts
+/dist
+/build
+*.egg-info
+
+# Ignore OS artifacts
+.DS_Store
+
+# Ignore pyenv artifacts
+.python-version
+
+# No compiled Python artifacts
+*.pyc
