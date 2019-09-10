@@ -1,3 +1,5 @@
+# [![quake-cli-tools](https://raw.githubusercontent.com/joshuaskelly/quake-cli-tools/master/.media/logo.svg?sanitize=true)](https://github.com/JoshuaSkelly/quake-cli-tools)
+
 # quake-cli-tools
 
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)]()
