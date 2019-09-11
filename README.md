@@ -6,6 +6,7 @@
 
 quake-cli-tools is a set of command line tools for creating Quake content.
 
+## Installation
 ```shell
 $ pip install quake-cli-tools
 ```
