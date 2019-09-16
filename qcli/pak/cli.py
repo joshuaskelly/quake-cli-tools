@@ -12,6 +12,7 @@ import sys
 from vgio.quake import pak
 
 import qcli
+import qcli.pak
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 

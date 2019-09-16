@@ -16,6 +16,7 @@ from watchdog.observers import Observer
 from vgio.quake import pak
 
 import qcli
+import qcli.qmount
 from qcli.common import Parser, ResolvePathAction
 from qcli.qmount.handlers import TempPakFileHandler
 import qcli.qmount.platforms as platforms

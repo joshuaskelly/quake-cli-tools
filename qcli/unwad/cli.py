@@ -17,6 +17,7 @@ from vgio import quake
 from vgio.quake import lmp, wad
 
 import qcli
+import qcli.unwad
 from qcli.common import Parser, ResolvePathAction
 
 

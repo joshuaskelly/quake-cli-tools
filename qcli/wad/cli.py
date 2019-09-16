@@ -16,6 +16,7 @@ from vgio import quake
 from vgio.quake import lmp, wad
 
 import qcli
+import qcli.wad
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 

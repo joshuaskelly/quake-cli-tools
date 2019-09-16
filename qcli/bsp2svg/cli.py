@@ -11,9 +11,10 @@ import sys
 
 
 from vgio.quake import bsp
-from . import bsp2svg
 
 import qcli
+import qcli.bsp2svg
+from qcli.bsp2svg import converter
 from qcli.common import Parser, ResolvePathAction
 
 
@@ -69,7 +70,7 @@ def main():
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir, exist_ok=True)
 
-    bsp2svg.convert(args.file, args.dest)
+    converter.convert(args.file, args.dest)
 
     sys.exit(0)
 
