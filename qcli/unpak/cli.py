@@ -13,6 +13,7 @@ from tabulate import tabulate
 from vgio.quake import pak
 
 import qcli
+import qcli.unpak
 from qcli.common import Parser, ResolvePathAction
 
 

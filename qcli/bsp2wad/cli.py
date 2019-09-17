@@ -13,6 +13,7 @@ import sys
 from vgio.quake import bsp, wad
 
 import qcli
+import qcli.bsp2wad
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 
