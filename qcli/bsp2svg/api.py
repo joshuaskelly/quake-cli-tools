@@ -54,8 +54,9 @@ class Bsp(object):
             edges = get_edges(face_index)
             vertexes = get_vertexes(face_index)
             uvs = get_uvs(face_index)
+            plane = get_plane(face_index)
 
-            return Face(vertexes, edges, uvs)
+            return Face(vertexes, edges, uvs, plane)
 
         @lru_cache(maxsize=None)
         def get_edges(face_index):
@@ -109,6 +110,11 @@ class Bsp(object):
 
             return uvs
 
+        @lru_cache(maxsize=None)
+        def get_plane(face_index):
+            bsp_face = bsp_file.faces[face_index]
+            return bsp_file.planes[bsp_face.plane_number]
+
         models = get_models()
         result = Bsp(models)
 
@@ -138,13 +144,15 @@ class Face(object):
     __slots__ = (
         'vertexes',
         'edges',
-        'uvs'
+        'uvs',
+        'plane'
     )
 
-    def __init__(self, vertexes, edges, uvs):
+    def __init__(self, vertexes, edges, uvs, plane):
         self.vertexes = vertexes
         self.edges = edges
         self.uvs = uvs
+        self.plane = plane
 
 
 Edge = namedtuple('Edge', ['vertex_0', 'vertex_1'])
