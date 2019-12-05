@@ -16,7 +16,7 @@ setup(
     packages=find_packages(exclude=['docs', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'Pillow>=6.1.0',
+        'Pillow>=6.2.0',
         'vgio>=1.1.2',
         'svgwrite>=1.3.1',
         'tabulate>=0.8.3',
