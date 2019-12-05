@@ -164,7 +164,7 @@ def main():
                     info.file_size = 40 + len(mip.pixels)
                     info.disk_size = info.file_size
                     info.compression = wad.CompressionType.NONE
-                    info.type = wad.LumpType.QPIC
+                    info.type = wad.LumpType.MIPTEX
 
                     log(f'  adding: {file}')
 
