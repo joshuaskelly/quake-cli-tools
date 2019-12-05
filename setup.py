@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Pillow>=6.1.0',
-        'vgio>=1.1.0',
+        'vgio>=1.1.2',
         'svgwrite>=1.3.1',
         'tabulate>=0.8.3',
         'watchdog>=0.9.0',
