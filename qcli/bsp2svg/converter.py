@@ -1,4 +1,5 @@
 import svgwrite
+from progress.bar import IncrementalBar
 
 from .api import Bsp
 
@@ -65,26 +66,27 @@ def convert(bsp_file, svg_file):
     )
     dwg.add(group)
 
-    for model in bsp_file.models:
-        drawn_polygons = []
+    faces = [face for model in bsp_file.models for face in model.faces]
 
-        for face in model.faces:
-            # Ignore perfectly vertical faces
-            if face.plane.normal[2] == 0:
-                continue
+    #for model in bsp_file.models:
+    drawn_polygons = []
 
-            points = process_vertexes(face.vertexes)
+    #for face in faces:
+    for face in IncrementalBar('Processing', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
+        points = process_vertexes(face.vertexes)
 
-            # Check if this polygon already exists
-            edges = list(zip(points, (points[1:] + [points[0]])))
-            polygon = {*edges}
-            reversed_polygon = {tuple(reversed(edge)) for edge in edges}
-            if polygon in drawn_polygons or reversed_polygon in drawn_polygons:
-                continue
+        points = list(map(lambda p: (max_x - p[0] + min_x, p[1]), points))
 
-            drawn_polygons.append(polygon)
+        # Check if this polygon already exists
+        edges = list(zip(points, (points[1:] + [points[0]])))
+        polygon = {*edges}
+        reversed_polygon = {tuple(reversed(edge)) for edge in edges}
+        if polygon in drawn_polygons or reversed_polygon in drawn_polygons:
+            continue
 
-            # Draw the polygon
-            group.add(dwg.polygon(points))
+        drawn_polygons.append(polygon)
+
+        # Draw the polygon
+        group.add(dwg.polygon(points))
 
     dwg.save()
