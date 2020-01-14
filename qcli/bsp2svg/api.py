@@ -53,7 +53,7 @@ class Bsp(object):
         def process_face(face_index):
             edges = get_edges(face_index)
             vertexes = get_vertexes(face_index)
-            uvs = get_uvs(face_index)
+            uvs = []#get_uvs(face_index)
             plane = get_plane(face_index)
 
             return Face(vertexes, edges, uvs, plane)

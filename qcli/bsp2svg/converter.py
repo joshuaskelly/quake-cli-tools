@@ -17,18 +17,6 @@ def simplify_number(number):
     return int(number) if int(number) == number else number
 
 
-def process_vertexes(vertexes):
-    """Converts vertices into points.
-
-    Args:
-        vertexes: A sequence of three-tuples.
-
-    Returns:
-        A sequence of two-tuples.
-    """
-    return [tuple(map(simplify_number, v[:2])) for v in vertexes]
-
-
 def convert(bsp_file, svg_file):
     """Renders the given bsp file to an svg file.
 
@@ -60,22 +48,18 @@ def convert(bsp_file, svg_file):
     )
 
     group = dwg.g(
-        stroke='black',
-        stroke_width=1,
-        fill='none'
+        id='bsp_ref',
     )
-    dwg.add(group)
+    dwg.defs.add(group)
 
     faces = [face for model in bsp_file.models for face in model.faces]
-
-    #for model in bsp_file.models:
     drawn_polygons = []
 
-    #for face in faces:
     for face in IncrementalBar('Processing', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
-        points = process_vertexes(face.vertexes)
-
+        # Process the vertices into points
+        points = [v[:2] for v in face.vertexes]
         points = list(map(lambda p: (max_x - p[0] + min_x, p[1]), points))
+        points = [tuple(map(simplify_number, p)) for p in points]
 
         # Check if this polygon already exists
         edges = list(zip(points, (points[1:] + [points[0]])))
@@ -88,5 +72,23 @@ def convert(bsp_file, svg_file):
 
         # Draw the polygon
         group.add(dwg.polygon(points))
+
+    dwg.add(
+        dwg.use(
+            href='#bsp_ref',
+            fill='none',
+            stroke='black',
+            stroke_width='15'
+        )
+    )
+
+    dwg.add(
+        dwg.use(
+            href='#bsp_ref',
+            fill='white',
+            stroke='black',
+            stroke_width='1'
+        )
+    )
 
     dwg.save()
