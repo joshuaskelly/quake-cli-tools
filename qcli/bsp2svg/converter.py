@@ -53,22 +53,15 @@ def convert(bsp_file, svg_file):
     dwg.defs.add(group)
 
     faces = [face for model in bsp_file.models for face in model.faces]
-    drawn_polygons = []
 
     for face in IncrementalBar('Processing', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
+        if face.texture_name.startswith('sky'):
+            continue
+
         # Process the vertices into points
         points = [v[:2] for v in face.vertexes]
         points = list(map(lambda p: (max_x - p[0] + min_x, p[1]), points))
         points = [tuple(map(simplify_number, p)) for p in points]
-
-        # Check if this polygon already exists
-        edges = list(zip(points, (points[1:] + [points[0]])))
-        polygon = {*edges}
-        reversed_polygon = {tuple(reversed(edge)) for edge in edges}
-        if polygon in drawn_polygons or reversed_polygon in drawn_polygons:
-            continue
-
-        drawn_polygons.append(polygon)
 
         # Draw the polygon
         group.add(dwg.polygon(points))
