@@ -53,9 +53,11 @@ class Bsp(object):
         def process_face(face_index):
             edges = get_edges(face_index)
             vertexes = get_vertexes(face_index)
-            uvs = get_uvs(face_index)
+            uvs = []#get_uvs(face_index)
+            plane = get_plane(face_index)
+            texture_name = get_texture_name(face_index)
 
-            return Face(vertexes, edges, uvs)
+            return Face(vertexes, edges, uvs, plane, texture_name)
 
         @lru_cache(maxsize=None)
         def get_edges(face_index):
@@ -89,6 +91,14 @@ class Bsp(object):
             return Vertex(*bsp_vertex[:])
 
         @lru_cache(maxsize=None)
+        def get_texture_name(face_index):
+            bsp_face = bsp_file.faces[face_index]
+            tex_info = bsp_file.texture_infos[bsp_face.texture_info]
+            miptex = bsp_file.miptextures[tex_info.miptexture_number]
+
+            return miptex.name
+
+        @lru_cache(maxsize=None)
         def get_uvs(face_index):
             bsp_face = bsp_file.faces[face_index]
             vertexes = get_vertexes(face_index)
@@ -108,6 +118,11 @@ class Bsp(object):
                 uvs.append(uv)
 
             return uvs
+
+        @lru_cache(maxsize=None)
+        def get_plane(face_index):
+            bsp_face = bsp_file.faces[face_index]
+            return bsp_file.planes[bsp_face.plane_number]
 
         models = get_models()
         result = Bsp(models)
@@ -138,13 +153,17 @@ class Face(object):
     __slots__ = (
         'vertexes',
         'edges',
-        'uvs'
+        'uvs',
+        'plane',
+        'texture_name'
     )
 
-    def __init__(self, vertexes, edges, uvs):
+    def __init__(self, vertexes, edges, uvs, plane, texture_name):
         self.vertexes = vertexes
         self.edges = edges
         self.uvs = uvs
+        self.plane = plane
+        self.texture_name = texture_name
 
 
 Edge = namedtuple('Edge', ['vertex_0', 'vertex_1'])

@@ -37,10 +37,10 @@ unpak:
 	pyinstaller --name=unpak ./qcli/unpak/cli.py
 
 unwad:
-	pyinstaller --name=unwad ./qcli/unwad/cli.py
+	pyinstaller --name=unwad ./qcli/unwad/cli.py --exclude=numpy
 
 wad:
-	pyinstaller --name=wad ./qcli/wad/cli.py
+	pyinstaller --name=wad ./qcli/wad/cli.py --exclude=numpy
 
 test:
 	python -m unittest discover -s tests

@@ -15,8 +15,10 @@ setup(
     license='MIT',
     packages=find_packages(exclude=['docs', 'tests*']),
     include_package_data=True,
+    python_requires='>=3.6',
     install_requires=[
         'Pillow>=6.2.0',
+        'progress>=1.5',
         'vgio>=1.1.2',
         'svgwrite>=1.3.1',
         'tabulate>=0.8.3',
