@@ -12,6 +12,10 @@ publish:
 	python setup.py sdist
 	twine upload dist/*
 
+publish-test:
+	python setup.py sdist
+	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
 package:
 	python package.py
 
