@@ -60,7 +60,7 @@ def convert(bsp_file, svg_file):
 
         # Process the vertices into points
         points = [v[:2] for v in face.vertexes]
-        points = list(map(lambda p: (max_x - p[0] + min_x, p[1]), points))
+        points = list(map(lambda p: (p[0], max_y - p[1] + min_y), points))
         points = [tuple(map(simplify_number, p)) for p in points]
 
         # Draw the polygon
