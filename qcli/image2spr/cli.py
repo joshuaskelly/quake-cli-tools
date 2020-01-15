@@ -14,6 +14,7 @@ from PIL import Image
 from vgio.quake import spr
 
 import qcli
+import qcli.image2spr
 from qcli.common import Parser
 from qcli.common import ResolvePathAction
 from qcli.common import read_from_stdin
