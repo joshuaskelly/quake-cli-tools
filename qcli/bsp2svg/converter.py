@@ -1,3 +1,5 @@
+import os
+
 import svgwrite
 from progress.bar import IncrementalBar
 
@@ -25,6 +27,7 @@ def convert(bsp_file, svg_file):
 
         svg_file: A file path to the svg file to write.
     """
+    print(f'Reading {os.path.basename(bsp_file)}')
     bsp_file = Bsp.open(bsp_file)
 
     # Determine map bounds
@@ -54,7 +57,7 @@ def convert(bsp_file, svg_file):
 
     faces = [face for model in bsp_file.models for face in model.faces]
 
-    for face in IncrementalBar('Processing', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
+    for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
         if face.texture_name.startswith('sky'):
             continue
 
@@ -84,4 +87,6 @@ def convert(bsp_file, svg_file):
         )
     )
 
+    print(f'Writing {os.path.basename(svg_file)}')
     dwg.save()
+    print('Done')
