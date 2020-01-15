@@ -9,8 +9,9 @@ import os
 import struct
 import sys
 
+import vgio
 from PIL import Image
-from quake import spr
+from vgio.quake import spr
 
 import qcli
 from qcli.common import Parser
@@ -68,7 +69,7 @@ def main():
     args = parser.parse_args()
 
     # Flatten out palette
-    quake_palette = [channel for rgb in spr.default_palette for channel in rgb]
+    quake_palette = [channel for rgb in vgio.quake.palette for channel in rgb]
 
     # Create palette image for Image.quantize()
     quake_palette_image = Image.frombytes('P', (16, 16), bytes(quake_palette))
@@ -111,10 +112,10 @@ def main():
                 source_palette = list(struct.unpack(f'{len(source_palette)}B', source_palette))
 
                 if local_transparency:
-                    source_palette[local_transparency * 3:local_transparency * 3 + 3] = spr.default_palette[-1]
+                    source_palette[local_transparency * 3:local_transparency * 3 + 3] = vgio.quake.palette[-1]
 
                 if global_transparency and global_transparency != local_transparency:
-                    source_palette[global_transparency * 3:global_transparency * 3 + 3] = spr.default_palette[-1]
+                    source_palette[global_transparency * 3:global_transparency * 3 + 3] = vgio.quake.palette[-1]
 
                 source_palette = bytes(source_palette)
 

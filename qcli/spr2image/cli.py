@@ -9,8 +9,9 @@ import argparse
 import os
 import sys
 
+import vgio
 from PIL import Image
-from quake import spr
+from vgio.quake import spr
 
 import qcli
 from qcli.common import Parser
@@ -75,10 +76,10 @@ def main():
 
     with spr.Spr.open(args.file) as spr_file:
         if not args.quiet:
-            print(f'Converting: {os.path.basename(args.file)}'
+            print(f'Converting: {os.path.basename(args.file)}')
 
         # Flatten out palette
-        palette = [channel for rgb in spr.default_palette for channel in rgb]
+        palette = [channel for rgb in vgio.quake.palette for channel in rgb]
 
         # Default frame animation is 10 frames per second
         default_duration = 10 / 60 * 1000
