@@ -13,7 +13,6 @@ import sys
 from vgio.quake import bsp
 
 import qcli
-import qcli.bsp2svg
 from qcli.bsp2svg import converter
 from qcli.common import Parser, ResolvePathAction
 
@@ -61,7 +60,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.bsp2svg.__version__}'
+        version=f'{parser.prog} version {qcli.__version__}'
     )
 
     args = parser.parse_args()

@@ -13,7 +13,6 @@ import sys
 from vgio.quake import bsp, wad
 
 import qcli
-import qcli.bsp2wad
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 
@@ -54,7 +53,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.bsp2wad.__version__}'
+        version=f'{parser.prog} version {qcli.__version__}'
     )
 
     args = parser.parse_args()

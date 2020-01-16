@@ -17,7 +17,6 @@ from vgio import quake
 from vgio.quake import lmp, wad
 
 import qcli
-import qcli.unwad
 from qcli.common import Parser, ResolvePathAction
 
 
@@ -71,7 +70,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.unwad.__version__}'
+        version=f'{parser.prog} version {qcli.__version__}'
     )
 
     args = parser.parse_args()

@@ -16,7 +16,6 @@ from vgio import quake
 from vgio.quake import lmp, wad
 
 import qcli
-import qcli.wad
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 
@@ -65,7 +64,7 @@ def main():
         '-v', '--version',
         dest='version',
         action='version',
-        version='{} version {}'.format(parser.prog, qcli.wad.__version__)
+        version='{} version {}'.format(parser.prog, qcli.__version__)
     )
 
     # Parse the arguments

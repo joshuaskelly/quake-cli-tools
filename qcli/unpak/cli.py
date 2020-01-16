@@ -13,7 +13,6 @@ from tabulate import tabulate
 from vgio.quake import pak
 
 import qcli
-import qcli.unpak
 from qcli.common import Parser, ResolvePathAction
 
 
@@ -57,7 +56,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.unpak.__version__}'
+        version=f'{parser.prog} version {qcli.__version__}'
     )
 
     args = parser.parse_args()

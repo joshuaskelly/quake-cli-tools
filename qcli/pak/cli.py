@@ -12,7 +12,6 @@ import sys
 from vgio.quake import pak
 
 import qcli
-import qcli.pak
 from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 
@@ -51,7 +50,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version='{} version {}'.format(parser.prog, qcli.pak.__version__)
+        version='{} version {}'.format(parser.prog, qcli.__version__)
     )
 
     args = parser.parse_args()

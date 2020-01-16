@@ -14,7 +14,6 @@ from PIL import Image
 from vgio.quake import spr
 
 import qcli
-import qcli.spr2image
 from qcli.common import Parser
 from qcli.common import ResolvePathAction
 
@@ -52,7 +51,7 @@ def main():
         dest='version',
         action='version',
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.spr2image.__version__}'
+        version=f'{parser.prog} version {qcli.__version__}'
     )
 
     args = parser.parse_args()
