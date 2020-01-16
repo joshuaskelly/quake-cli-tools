@@ -41,6 +41,15 @@ def main():
     )
 
     parser.add_argument(
+        '-i', '--ignore',
+        dest='ignore',
+        metavar='name',
+        nargs='*',
+        default=[],
+        help='texture names to ignore'
+    )
+
+    parser.add_argument(
         '-q',
         dest='quiet',
         action='store_true',
@@ -70,7 +79,7 @@ def main():
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir, exist_ok=True)
 
-    converter.convert(args.file, args.dest)
+    converter.convert(args.file, args.dest, args)
 
     sys.exit(0)
 

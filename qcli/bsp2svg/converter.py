@@ -19,13 +19,15 @@ def simplify_number(number):
     return int(number) if int(number) == number else number
 
 
-def convert(bsp_file, svg_file):
+def convert(bsp_file, svg_file, args):
     """Renders the given bsp file to an svg file.
 
     Args:
         bsp_file: A file path to the bsp file to read.
 
         svg_file: A file path to the svg file to write.
+
+        args: An argsparse args object with additional arguments.
     """
     print(f'Reading {os.path.basename(bsp_file)}')
     bsp_file = Bsp.open(bsp_file)
@@ -55,10 +57,13 @@ def convert(bsp_file, svg_file):
     )
     dwg.defs.add(group)
 
+    ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
     faces = [face for model in bsp_file.models for face in model.faces]
+    faces.sort(key=lambda f: f.vertexes[0].z)
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
-        if face.texture_name.startswith('sky'):
+        texture_name = face.texture_name
+        if texture_name.startswith('sky') or texture_name in ignore_textures:
             continue
 
         # Process the vertices into points
