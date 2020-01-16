@@ -55,10 +55,12 @@ def convert(bsp_file, svg_file):
     )
     dwg.defs.add(group)
 
+    ignore_textures = ['clip', 'hint', 'trigger']
     faces = [face for model in bsp_file.models for face in model.faces]
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
-        if face.texture_name.startswith('sky'):
+        texture_name = face.texture_name
+        if texture_name.startswith('sky') or texture_name in ignore_textures:
             continue
 
         # Process the vertices into points
