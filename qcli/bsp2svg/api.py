@@ -92,9 +92,19 @@ class Bsp(object):
 
         @lru_cache(maxsize=None)
         def get_texture_name(face_index):
+            if face_index == -1:
+                return ''
+            
             bsp_face = bsp_file.faces[face_index]
+
+            if bsp_face.texture_info == -1:
+                return ''
+
             tex_info = bsp_file.texture_infos[bsp_face.texture_info]
             miptex = bsp_file.miptextures[tex_info.miptexture_number]
+
+            if not miptex:
+                return ''
 
             return miptex.name
 
