@@ -52,6 +52,14 @@ def convert(bsp_file, svg_file, args):
         profile='tiny'
     )
 
+    dwg.add(
+        dwg.rect(
+            insert=(min_x - padding, min_y - padding),
+            size=(width + padding * 2, height + padding * 2),
+            fill='#fff'
+        )
+    )
+
     group = dwg.g(
         id='bsp_ref',
     )
