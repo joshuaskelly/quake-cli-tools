@@ -29,8 +29,10 @@ def main():
     )
 
     parser.add_argument(
-        'dest_file',
+        '-d',
         metavar='file.spr',
+        dest='dest',
+        default=os.getcwd(),
         action=ResolvePathAction,
         help='spr file to create'
     )
@@ -141,6 +143,7 @@ def main():
 
     if not images:
         print(f'{parser.prog}: no usable source images given', file=sys.stderr)
+        print(parser.print_help())
         sys.exit(1)
 
     # Normalize image sizes
@@ -166,8 +169,20 @@ def main():
 
             images = resized_images
 
+    # Validate or create out file
+    if args.dest == os.getcwd():
+        first_file = args.source_files[0] if len(args.source_files) > 0 else 'out.spr'
+        image_path = os.path.dirname(first_file)
+        spr_name = f'{os.path.basename(first_file).split(".")[0]}.spr'
+
+        args.dest = os.path.join(image_path, spr_name)
+
+    dest_dir = os.path.dirname(args.dest) or '.'
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
     # Build Quake sprite
-    with spr.Spr.open(args.dest_file, 'w') as spr_file:
+    with spr.Spr.open(args.dest, 'w') as spr_file:
         spr_file.width, spr_file.height = size
         spr_file.number_of_frames = len(images)
         spr_file.type = int(args.type)
