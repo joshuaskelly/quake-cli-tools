@@ -10,6 +10,7 @@ import os
 import signal
 import sys
 import time
+from tkinter import filedialog
 
 from watchdog.observers import Observer
 
@@ -19,6 +20,21 @@ import qcli
 from qcli.common import Parser, ResolvePathAction
 from qcli.qmount.handlers import TempPakFileHandler
 import qcli.qmount.platforms as platforms
+
+
+def update_pak(context, archive_name, files, pak_filename):
+    # Write out updated files
+    if context['dirty']:
+        print(f'Updating changes to {archive_name}...')
+
+        with pak.PakFile(pak_filename, 'w') as pak_file:
+            for filename in files:
+                pak_file.writestr(filename, files[filename])
+
+        print('Saved!')
+
+    else:
+        print(f'No changes detected to {archive_name}')
 
 
 def main():
@@ -38,14 +54,15 @@ def main():
         'file',
         metavar='file.pak',
         action=ResolvePathAction,
-        help='pak file to mount'
+        help='pak file to mount',
+        nargs='?'
     )
 
     parser.add_argument(
-        '-f', '--file-browser',
+        '-f', '--no-file-browser',
         dest='open_file_browser',
-        action='store_true',
-        help='opens a file browser once mounted'
+        action='store_false',
+        help="don't open a file browser once mounted"
     )
 
     parser.add_argument(
@@ -64,6 +81,12 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.file is None:
+        args.file = filedialog.askopenfilename(
+            title="Choose PAK file",
+            filetypes=(("Quake PAK", "*.pak"),
+                       ("all files", "*.*")))
 
     dir = os.path.dirname(args.file) or '.'
     if not os.path.exists(dir):
@@ -115,14 +138,21 @@ def main():
     )
     observer.schedule(handler, path=temp_directory, recursive=True)
 
-    print('Press Ctrl+C to save and quit')
+    if sys.platform == 'win32':
+        print('Press Ctrl+S to save')
+        print('Press Ctrl+C to quit without saving')
+    else:
+        print('Press Ctrl+C to save and quit')
 
     observer.start()
 
     # Wait for user to terminate
     try:
         while True:
-            time.sleep(1)
+            time.sleep(0.1)
+
+            if platforms.check_save_key():
+                update_pak(context, archive_name, files, args.file)
 
             # Detect the deletion of the watched directory.
             if not os.path.exists(temp_directory):
@@ -139,16 +169,8 @@ def main():
 
     observer.join()
 
-    # Write out updated files
-    if context['dirty']:
-        print(f'Updating changes to {archive_name}')
-
-        with pak.PakFile(args.file, 'w') as pak_file:
-            for filename in files:
-                pak_file.writestr(filename, files[filename])
-
-    else:
-        print(f'No changes detected to {archive_name}')
+    if sys.platform != 'win32':
+        update_pak(context, archive_name, files, args.file)
 
     # Clean up temp directory
     platforms.unmount_temp_volume(temp_directory)

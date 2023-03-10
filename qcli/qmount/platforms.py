@@ -141,3 +141,21 @@ def open_file_browser(path):
 
     else:
         raise
+
+
+def check_save_key():
+    if sys.platform == 'darwin':
+        return False
+    
+    elif sys.platform == 'win32':
+        import msvcrt
+        if msvcrt.kbhit():
+            key = msvcrt.getch()
+            # print(key)
+            if key == b"\x13":
+                return True
+        
+        return False
+    
+    elif sys.platform == 'linux':
+        return False

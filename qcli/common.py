@@ -23,6 +23,8 @@ def read_from_stdin():
 class ResolvePathAction(argparse.Action):
     """Action to resolve paths and expand environment variables"""
     def __call__(self, parser, namespace, values, option_string=None):
+        if values is None:
+            return
         if isinstance(values, list):
             fullpath = [os.path.expanduser(v) for v in values]
         else:
