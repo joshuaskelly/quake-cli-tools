@@ -12,6 +12,8 @@ import sys
 
 from vgio.quake import bsp
 
+# sys.path.insert(0, '../../')
+sys.path.insert(0, 'C:/gitprojects/quake-cli-tools/')
 import qcli
 from qcli.bsp2svg import converter
 from qcli.common import Parser, ResolvePathAction
@@ -46,6 +48,15 @@ def main():
         nargs='*',
         default=[],
         help='texture names to ignore'
+    )
+
+    parser.add_argument(
+        '-f', '--floors',
+        dest='floors',
+        metavar='name',
+        nargs='*',
+        default=[],
+        help='floor heigts where slices are created'
     )
 
     parser.add_argument(

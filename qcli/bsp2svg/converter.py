@@ -18,6 +18,31 @@ def simplify_number(number):
     """
     return int(number) if int(number) == number else number
 
+def get_clustered_floor_heights(zvalues):
+    clusters = []
+    # TODO Configurable parameters with default values
+    eps = 32
+    floor_threshold = 0.012
+    points_sorted = sorted(zvalues)
+    curr_point = points_sorted[0]
+    curr_cluster = [curr_point]
+    max_len = 0
+    for point in IncrementalBar('Clustering floors', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(points_sorted[1:]):
+        if point <= curr_point + eps:
+            curr_cluster.append(point)
+        else:
+            clusters.append(curr_cluster)
+            max_len = max(max_len, len(curr_cluster))
+            curr_cluster = [point]
+        curr_point = point
+    clusters.append(curr_cluster)
+
+    trimmed_clusters = []
+    for cluster in clusters:
+        if len(cluster) / max_len > floor_threshold:
+            trimmed_clusters.append(cluster[0])
+
+    return trimmed_clusters
 
 def convert(bsp_file, svg_file, args):
     """Renders the given bsp file to an svg file.
@@ -36,6 +61,9 @@ def convert(bsp_file, svg_file, args):
     vs = [vertex[:] for model in bsp_file.models for face in model.faces for vertex in face.vertexes]
     xs = [v[0] for v in vs]
     ys = [v[1] for v in vs]
+    zs = [int(v[2]) for v in vs]
+
+    floors = list(map(lambda s: float(s), args.floors)) if len(args.floors) > 0 else get_clustered_floor_heights(zs)
 
     min_x = min(xs)
     max_x = max(xs)
@@ -60,10 +88,15 @@ def convert(bsp_file, svg_file, args):
         )
     )
 
-    group = dwg.g(
-        id='bsp_ref',
-    )
-    dwg.defs.add(group)
+    crt_index = 0
+    dwg_tuples = []
+    for f in floors:
+        group = dwg.g(
+            id='bsp_ref_%i' % crt_index,
+        )
+        dwg.defs.add(group)
+        crt_index += 1
+        dwg_tuples.append((f, group))
 
     ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
     faces = [face for model in bsp_file.models for face in model.faces]
@@ -80,25 +113,45 @@ def convert(bsp_file, svg_file, args):
         points = [tuple(map(simplify_number, p)) for p in points]
 
         # Draw the polygon
-        group.add(dwg.polygon(points))
+        was_added = False
+        for i in range(len(dwg_tuples) - 1):
+            crt_floor_z = dwg_tuples[i][0]
+            next_floor_z = dwg_tuples[i+1][0]
+            crt_face_z = face.vertexes[0].z
+            if crt_face_z >= crt_floor_z and crt_face_z < next_floor_z:
+                crt_group = dwg_tuples[i][1]
+                crt_group.add(dwg.polygon(points))
+                was_added = True
+                break
+        if was_added == False:
+            dwg_tuples[len(dwg_tuples) - 1][1].add(dwg.polygon(points))
 
-    dwg.add(
-        dwg.use(
-            href='#bsp_ref',
-            fill='none',
-            stroke='black',
-            stroke_width='15'
-        )
-    )
+    for i in range(len(dwg_tuples)):
+        color_val = 70 + 30 * (i+1)/len(dwg_tuples)
 
-    dwg.add(
-        dwg.use(
-            href='#bsp_ref',
-            fill='white',
-            stroke='black',
-            stroke_width='1'
+        group = dwg.g()
+        group.add(
+            dwg.use(
+                href='#bsp_ref_%i' % i,
+                fill='none',
+                stroke='black',
+                stroke_width='15',
+                stroke_miterlimit='0'
+                # defaults to 4
+                # 3 & 4 shows nasty pointy bits on some corners
+                # 2 takes care care of most of those bits
+                # 0 & 1 takes care of all bits, but tapers some corners
+            )
         )
-    )
+        group.add(
+            dwg.use(
+                href='#bsp_ref_%i' % i,
+                fill=svgwrite.rgb(color_val, color_val, color_val, '%'),
+                stroke='black',
+                stroke_width='1'
+            )
+        )
+        dwg.add(group)
 
     print(f'Writing {os.path.basename(svg_file)}')
     dwg.save()
