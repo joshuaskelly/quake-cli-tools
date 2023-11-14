@@ -42,6 +42,14 @@ def main():
     )
 
     parser.add_argument(
+        '-a', '--axis',
+        choices=['x', 'y', 'z'],
+        dest='axis',
+        default='z',
+        help='projection axis'
+    )
+
+    parser.add_argument(
         '-i', '--ignore',
         dest='ignore',
         metavar='name',
@@ -53,10 +61,9 @@ def main():
     parser.add_argument(
         '-f', '--floors',
         dest='floors',
-        metavar='name',
         nargs='*',
         default=[],
-        help='floor heigts where slices are created'
+        help='floor heigts where slices are created. skip for automatic floor detection'
     )
 
     parser.add_argument(
@@ -82,7 +89,7 @@ def main():
     # Validate or create out file
     if args.dest == os.getcwd():
         svg_path = os.path.dirname(args.file)
-        svg_name = f'{os.path.basename(args.file).split(".")[0]}.svg'
+        svg_name = f'{os.path.basename(args.file).split(".")[0]}_{args.axis}.svg'
         args.dest = os.path.join(svg_path, svg_name)
 
     dest_dir = os.path.dirname(args.dest) or '.'

@@ -21,6 +21,7 @@ def simplify_number(number):
 def get_clustered_floor_heights(zvalues):
     clusters = []
     # TODO Configurable parameters with default values
+    # TODO Description for each parameter
     floor_threshold = 1
     fake_floor_ratio = 0.25
     floor_merge_threshold = 96
@@ -75,6 +76,7 @@ def convert(bsp_file, svg_file, args):
     """
     print(f'Reading {os.path.basename(bsp_file)}')
     bsp_file = Bsp.open(bsp_file)
+    projection_axis = args.axis
 
     # Filter faces
     faces = [face for model in bsp_file.models for face in model.faces]
@@ -85,33 +87,35 @@ def convert(bsp_file, svg_file, args):
     vs = [vertex[:] for face in faces for vertex in face.vertexes]
     xs = [v[0] for v in vs]
     ys = [v[1] for v in vs]
+    zs = [v[2] for v in vs]
 
     # Filter face with type2 plane (axial plane aligned to the z-axis)
     zfaces = list(filter(lambda f: f.plane.type == 2, faces))
-    zs = [int(face.plane.distance) for face in zfaces]
-    # zs = [vertex[:][2] for face in zfaces for vertex in face.vertexes]
+    zheights = [int(face.plane.distance) for face in zfaces]
+    # zheights = [vertex[:][2] for face in zfaces for vertex in face.vertexes]
+    floors = list(map(lambda s: float(s), args.floors)) if len(args.floors) > 0 else get_clustered_floor_heights(zheights)
 
-    floors = list(map(lambda s: float(s), args.floors)) if len(args.floors) > 0 else get_clustered_floor_heights(zs)
+    drawing_xs = xs if projection_axis in ['y', 'z'] else ys
+    drawing_ys = zs if projection_axis in ['x', 'y'] else ys
+    drawing_min_x = min(drawing_xs)
+    drawing_max_x = max(drawing_xs)
+    drawing_min_y = min(drawing_ys)
+    drawing_max_y = max(drawing_ys)
 
-    min_x = min(xs)
-    max_x = max(xs)
-    min_y = min(ys)
-    max_y = max(ys)
-
-    width = max_x - min_x
-    height = max_y - min_y
+    width = drawing_max_x - drawing_min_x
+    height = drawing_max_y - drawing_min_y
     padding = min(width // 10, height // 10)
 
     dwg = svgwrite.Drawing(
         svg_file,
-        viewBox=f'{min_x - padding} {min_y - padding} {width + padding * 2} {height + padding * 2}',
+        viewBox=f'{drawing_min_x - padding} {drawing_min_y - padding} {width + padding * 2} {height + padding * 2}',
         profile='tiny'
     )
 
     dwg.add(
         dwg.rect(
             id='background',
-            insert=(min_x - padding, min_y - padding),
+            insert=(drawing_min_x - padding, drawing_min_y - padding),
             size=(width + padding * 2, height + padding * 2),
             fill='#fff'
         )
@@ -130,12 +134,26 @@ def convert(bsp_file, svg_file, args):
     )
     dwg.defs.add(complete_group)
 
-    faces.sort(key=lambda f: f.vertexes[0].z)
+    if projection_axis == 'x':
+        faces.sort(key=lambda f: f.vertexes[0].x)
+    elif projection_axis == 'y':
+        faces.sort(key=lambda f: f.vertexes[0].y)
+    elif projection_axis == 'z':
+        faces.sort(key=lambda f: f.vertexes[0].z)
+    
+    def vs_picker(vertexes):
+        if projection_axis == 'x':
+            return vertexes[1:3]
+        elif projection_axis == 'y':
+            return [vertexes[0], vertexes[2]]
+        elif projection_axis == 'z':
+            return vertexes[:2]
+        else: return []
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
         # Process the vertices into points
-        points = [v[:2] for v in face.vertexes]
-        points = list(map(lambda p: (p[0], max_y - p[1] + min_y), points))
+        points = [vs_picker(v) for v in face.vertexes]
+        points = list(map(lambda p: (p[0], drawing_max_y - p[1] + drawing_min_y), points))
         points = [tuple(map(simplify_number, p)) for p in points]
 
         # Draw the complete polygon
