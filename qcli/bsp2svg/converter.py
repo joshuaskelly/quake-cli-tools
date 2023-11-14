@@ -21,28 +21,47 @@ def simplify_number(number):
 def get_clustered_floor_heights(zvalues):
     clusters = []
     # TODO Configurable parameters with default values
-    eps = 32
-    floor_threshold = 0.012
-    points_sorted = sorted(zvalues)
-    curr_point = points_sorted[0]
-    curr_cluster = [curr_point]
+    floor_threshold = 1
+    fake_floor_ratio = 0.25
+    floor_merge_threshold = 96
+    zvalues_sorted = sorted(zvalues)
+    crt_point = zvalues_sorted[0]
+    crt_cluster = [crt_point]
     max_len = 0
-    for point in IncrementalBar('Clustering floors', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(points_sorted[1:]):
-        if point <= curr_point + eps:
-            curr_cluster.append(point)
+    for point in IncrementalBar('Clustering floors', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(zvalues_sorted[1:]):
+        if point - crt_point <= floor_threshold:
+            crt_cluster.append(point)
         else:
-            clusters.append(curr_cluster)
-            max_len = max(max_len, len(curr_cluster))
-            curr_cluster = [point]
-        curr_point = point
-    clusters.append(curr_cluster)
+            clusters.append(crt_cluster)
+            max_len = max(max_len, len(crt_cluster))
+            crt_cluster = [point]
+        crt_point = point
+    clusters.append(crt_cluster)
 
-    trimmed_clusters = []
+    initial_clusters = list(map(lambda s: (s[0], len(s)/max_len), clusters))
+    print("initial clusters: %s" % initial_clusters)
+
+    floors_trimmed = []
     for cluster in clusters:
-        if len(cluster) / max_len > floor_threshold:
-            trimmed_clusters.append(cluster[0])
+        if len(cluster) / max_len > fake_floor_ratio:
+            floors_trimmed.append(cluster[0])
+    print("floors after trimming: %s" % floors_trimmed)
 
-    return trimmed_clusters
+    floors_merged = []
+    crt_height = floors_trimmed[0]
+    for floor in floors_trimmed:
+        if floor - crt_height > floor_merge_threshold:
+            floors_merged.append(floor)
+        crt_height = floor
+
+    top_height = zvalues_sorted[len(zvalues) - 1]
+    print("will also include bottom and ceiling: %i, %i" % (zvalues_sorted[0], top_height))
+    floors_merged.insert(0, zvalues_sorted[0])
+    floors_merged.append(top_height)
+    print("floors after merging: %s" % floors_merged)
+
+
+    return floors_merged
 
 def convert(bsp_file, svg_file, args):
     """Renders the given bsp file to an svg file.
@@ -57,11 +76,20 @@ def convert(bsp_file, svg_file, args):
     print(f'Reading {os.path.basename(bsp_file)}')
     bsp_file = Bsp.open(bsp_file)
 
+    # Filter faces
+    faces = [face for model in bsp_file.models for face in model.faces]
+    ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
+    faces = list(filter(lambda f: not (f.texture_name.startswith('sky') or f.texture_name in ignore_textures), faces))
+
     # Determine map bounds
-    vs = [vertex[:] for model in bsp_file.models for face in model.faces for vertex in face.vertexes]
+    vs = [vertex[:] for face in faces for vertex in face.vertexes]
     xs = [v[0] for v in vs]
     ys = [v[1] for v in vs]
-    zs = [int(v[2]) for v in vs]
+
+    # Filter face with type2 plane (axial plane aligned to the z-axis)
+    zfaces = list(filter(lambda f: f.plane.type == 2, faces))
+    zs = [int(face.plane.distance) for face in zfaces]
+    # zs = [vertex[:][2] for face in zfaces for vertex in face.vertexes]
 
     floors = list(map(lambda s: float(s), args.floors)) if len(args.floors) > 0 else get_clustered_floor_heights(zs)
 
@@ -82,38 +110,39 @@ def convert(bsp_file, svg_file, args):
 
     dwg.add(
         dwg.rect(
+            id='background',
             insert=(min_x - padding, min_y - padding),
             size=(width + padding * 2, height + padding * 2),
             fill='#fff'
         )
     )
 
-    crt_index = 0
     dwg_tuples = []
-    for f in floors:
+    for i in range(len(floors)):
         group = dwg.g(
-            id='bsp_ref_%i' % crt_index,
+            id='bsp_ref_%i' % i,
         )
         dwg.defs.add(group)
-        crt_index += 1
-        dwg_tuples.append((f, group))
+        dwg_tuples.append((floors[i], group))
 
-    ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
-    faces = [face for model in bsp_file.models for face in model.faces]
+    complete_group = dwg.g(
+        id='bsp_complete_ref',
+    )
+    dwg.defs.add(complete_group)
+
     faces.sort(key=lambda f: f.vertexes[0].z)
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
-        texture_name = face.texture_name
-        if texture_name.startswith('sky') or texture_name in ignore_textures:
-            continue
-
         # Process the vertices into points
         points = [v[:2] for v in face.vertexes]
         points = list(map(lambda p: (p[0], max_y - p[1] + min_y), points))
         points = [tuple(map(simplify_number, p)) for p in points]
 
-        # Draw the polygon
+        # Draw the complete polygon
+        complete_group.add(dwg.polygon(points))
+
         was_added = False
+        # Find the correct layer to draw on, based on height
         for i in range(len(dwg_tuples) - 1):
             crt_floor_z = dwg_tuples[i][0]
             next_floor_z = dwg_tuples[i+1][0]
@@ -124,12 +153,17 @@ def convert(bsp_file, svg_file, args):
                 was_added = True
                 break
         if was_added == False:
-            dwg_tuples[len(dwg_tuples) - 1][1].add(dwg.polygon(points))
+            # if a face was not added until this point, it goes into to the last group
+            last_tuple = dwg_tuples[len(dwg_tuples) - 1]
+            last_tuple[1].add(dwg.polygon(points))
 
     for i in range(len(dwg_tuples)):
+        # use multiple shades, from 70% gray to white
         color_val = 70 + 30 * (i+1)/len(dwg_tuples)
 
-        group = dwg.g()
+        group = dwg.g(
+            id='height_%i' % dwg_tuples[i][0],
+        )
         group.add(
             dwg.use(
                 href='#bsp_ref_%i' % i,
@@ -139,7 +173,7 @@ def convert(bsp_file, svg_file, args):
                 stroke_miterlimit='0'
                 # defaults to 4
                 # 3 & 4 shows nasty pointy bits on some corners
-                # 2 takes care care of most of those bits
+                # 2 takes care care of most (but not all) of those bits
                 # 0 & 1 takes care of all bits, but tapers some corners
             )
         )
@@ -152,6 +186,26 @@ def convert(bsp_file, svg_file, args):
             )
         )
         dwg.add(group)
+
+    group = dwg.g(id="complete")
+    group.add(
+        dwg.use(
+            href='#bsp_complete_ref',
+            fill='none',
+            stroke='black',
+            stroke_width='15',
+            stroke_miterlimit='0'
+        )
+    )
+    group.add(
+        dwg.use(
+            href='#bsp_complete_ref',
+            fill='white',
+            stroke='black',
+            stroke_width='1'
+        )
+    )
+    dwg.add(group)
 
     print(f'Writing {os.path.basename(svg_file)}')
     dwg.save()
