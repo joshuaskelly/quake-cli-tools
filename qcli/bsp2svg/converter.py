@@ -18,13 +18,11 @@ def simplify_number(number):
     """
     return int(number) if int(number) == number else number
 
-def get_clustered_floor_heights(zvalues):
+def get_clustered_floor_heights(zvalues, parameters):
     clusters = []
-    # TODO Configurable parameters with default values
-    # TODO Description for each parameter
-    floor_threshold = 1
-    fake_floor_ratio = 0.25
-    floor_merge_threshold = 96
+    floor_threshold = parameters[0]
+    fake_floor_ratio = parameters[1]
+    floor_merge_threshold = parameters[2]
     zvalues_sorted = sorted(zvalues)
     crt_point = zvalues_sorted[0]
     crt_cluster = [crt_point]
@@ -93,7 +91,7 @@ def convert(bsp_file, svg_file, args):
     zfaces = list(filter(lambda f: f.plane.type == 2, faces))
     zheights = [int(face.plane.distance) for face in zfaces]
     # zheights = [vertex[:][2] for face in zfaces for vertex in face.vertexes]
-    floors = list(map(lambda s: float(s), args.floors)) if len(args.floors) > 0 else get_clustered_floor_heights(zheights)
+    floors = args.floors if len(args.floors) > 0 else get_clustered_floor_heights(zheights, args.params)
 
     drawing_xs = xs if projection_axis in ['y', 'z'] else ys
     drawing_ys = zs if projection_axis in ['x', 'y'] else ys
@@ -157,7 +155,8 @@ def convert(bsp_file, svg_file, args):
         points = [tuple(map(simplify_number, p)) for p in points]
 
         # Draw the complete polygon
-        complete_group.add(dwg.polygon(points))
+        # TODO Find a way to create the complete polygon and avoid doubling everything
+        # complete_group.add(dwg.polygon(points))
 
         was_added = False
         # Find the correct layer to draw on, based on height

@@ -43,10 +43,20 @@ def main():
 
     parser.add_argument(
         '-a', '--axis',
-        choices=['x', 'y', 'z'],
         dest='axis',
+        choices=['x', 'y', 'z'],
         default='z',
-        help='projection axis'
+        help='projection axis. "z" (default) will create a top down view, "x" and "y" will create a frontal and lateral view'
+    )
+
+    parser.add_argument(
+        '-p', '--parameters',
+        dest='params',
+        metavar=(1, 0.5, 64),
+        nargs=3,
+        type=float,
+        default=[1, 0.5, 64],
+        help='automatic floor detection parameters. the detection works in 3 passes, each parameter is a number that affects each pass. the first is floor_threshold, defaults to 1, usable values are in (1, 32) range. affects the initial detection of floors, smaller values will detect mor floors. the second is fake_floor_ratio, defaults to 0.5, usable values are in the (0.01, 0.9) range. it represents the ratio of floor/biggest_floor, any floor below this ratio will be ignored. the third is floor_merge_threshold, defaults to 64, usable values are in the (16, 96) range. this affects the last pass in the floor trimming procedure, any previously detected floors that are followed by a floor at less z-distance than this param will be ignored.'
     )
 
     parser.add_argument(
@@ -61,9 +71,11 @@ def main():
     parser.add_argument(
         '-f', '--floors',
         dest='floors',
+        metavar='floor',
         nargs='*',
+        type=float,
         default=[],
-        help='floor heigts where slices are created. skip for automatic floor detection'
+        help='numbers representing floor heigts where slices are created. skip for automatic floor detection'
     )
 
     parser.add_argument(
