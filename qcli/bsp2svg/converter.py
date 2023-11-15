@@ -127,11 +127,6 @@ def convert(bsp_file, svg_file, args):
         dwg.defs.add(group)
         dwg_tuples.append((floors[i], group))
 
-    complete_group = dwg.g(
-        id='bsp_complete_ref',
-    )
-    dwg.defs.add(complete_group)
-
     if projection_axis == 'x':
         faces.sort(key=lambda f: f.vertexes[0].x)
     elif projection_axis == 'y':
@@ -146,17 +141,12 @@ def convert(bsp_file, svg_file, args):
             return [vertexes[0], vertexes[2]]
         elif projection_axis == 'z':
             return vertexes[:2]
-        else: return []
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
         # Process the vertices into points
         points = [vs_picker(v) for v in face.vertexes]
         points = list(map(lambda p: (p[0], drawing_max_y - p[1] + drawing_min_y), points))
         points = [tuple(map(simplify_number, p)) for p in points]
-
-        # Draw the complete polygon
-        # TODO Find a way to create the complete polygon and avoid doubling everything
-        # complete_group.add(dwg.polygon(points))
 
         was_added = False
         # Find the correct layer to draw on, based on height
@@ -173,7 +163,21 @@ def convert(bsp_file, svg_file, args):
             # if a face was not added until this point, it goes into to the last group
             last_tuple = dwg_tuples[len(dwg_tuples) - 1]
             last_tuple[1].add(dwg.polygon(points))
-
+    
+    complete_group_edges = dwg.g(
+        id='complete_edges',
+        fill='none',
+        stroke='black',
+        stroke_width='15',
+        stroke_miterlimit='0'
+    )
+    complete_group_fill = dwg.g(
+        id='complete_fill',
+        fill='white',
+        stroke='black',
+        stroke_width='1',
+        stroke_miterlimit='0'
+    )
     for i in range(len(dwg_tuples)):
         # use multiple shades, from 70% gray to white
         color_val = 70 + 30 * (i+1)/len(dwg_tuples)
@@ -203,25 +207,23 @@ def convert(bsp_file, svg_file, args):
             )
         )
         dwg.add(group)
+        complete_group_edges.add(
+            dwg.use(
+                href='#bsp_ref_%i' % i,
+            )
+        )
+        complete_group_fill.add(
+            dwg.use(
+                href='#bsp_ref_%i' % i,
+            )
+        )
 
-    group = dwg.g(id="complete")
-    group.add(
-        dwg.use(
-            href='#bsp_complete_ref',
-            fill='none',
-            stroke='black',
-            stroke_width='15',
-            stroke_miterlimit='0'
-        )
+    group = dwg.g(
+        id='complete',
+        display='none',
     )
-    group.add(
-        dwg.use(
-            href='#bsp_complete_ref',
-            fill='white',
-            stroke='black',
-            stroke_width='1'
-        )
-    )
+    group.add(complete_group_edges)
+    group.add(complete_group_fill)
     dwg.add(group)
 
     print(f'Writing {os.path.basename(svg_file)}')
