@@ -1,4 +1,4 @@
-"""Command line utility for creating and creating WAD files from BSP files
+"""Command line utility for creating SVG files from BSP files
 
 Supported Games:
     - QUAKE
@@ -12,8 +12,6 @@ import sys
 
 from vgio.quake import bsp
 
-# sys.path.insert(0, '../../')
-sys.path.insert(0, 'C:/gitprojects/quake-cli-tools/')
 import qcli
 from qcli.bsp2svg import converter
 from qcli.common import Parser, ResolvePathAction

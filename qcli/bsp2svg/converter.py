@@ -18,11 +18,11 @@ def simplify_number(number):
     """
     return int(number) if int(number) == number else number
 
-def get_clustered_floor_heights(zvalues, parameters):
+def get_clustered_floor_heights(zvalues, args):
     clusters = []
-    floor_threshold = parameters[0]
-    fake_floor_ratio = parameters[1]
-    floor_merge_threshold = parameters[2]
+    floor_threshold = args.params[0]
+    fake_floor_ratio = args.params[1]
+    floor_merge_threshold = args.params[2]
     zvalues_sorted = sorted(zvalues)
     crt_point = zvalues_sorted[0]
     crt_cluster = [crt_point]
@@ -38,13 +38,15 @@ def get_clustered_floor_heights(zvalues, parameters):
     clusters.append(crt_cluster)
 
     initial_clusters = list(map(lambda s: (s[0], len(s)/max_len), clusters))
-    print("initial clusters: %s" % initial_clusters)
+    if not args.quiet:
+        print(f'initial floor clusters: {initial_clusters}')
 
     floors_trimmed = []
     for cluster in clusters:
         if len(cluster) / max_len > fake_floor_ratio:
             floors_trimmed.append(cluster[0])
-    print("floors after trimming: %s" % floors_trimmed)
+    if not args.quiet:
+        print(f'floors after trimming: {floors_trimmed}')
 
     floors_merged = []
     crt_height = floors_trimmed[0]
@@ -54,11 +56,12 @@ def get_clustered_floor_heights(zvalues, parameters):
         crt_height = floor
 
     top_height = zvalues_sorted[len(zvalues) - 1]
-    print("will also include bottom and ceiling: %i, %i" % (zvalues_sorted[0], top_height))
+    if not args.quiet:
+        print(f'will also include bottom and ceiling: {zvalues_sorted[0]}, {top_height}')
     floors_merged.insert(0, zvalues_sorted[0])
     floors_merged.append(top_height)
-    print("floors after merging: %s" % floors_merged)
-
+    if not args.quiet:
+        print(f'floors after merging: {floors_merged}')
 
     return floors_merged
 
@@ -92,14 +95,14 @@ def convert(bsp_file, svg_file, args):
     zheights = [int(face.plane.distance) for face in zfaces]
     floors = []
     if args.floors == None:
-        # disable floor slicing - everythig will go on one layer
+        # disable floor slicing - everything will go on one layer
         floors = [0]
     elif len(args.floors) > 0:
         # enable slicing at user configured levels
-        floors = args.floors
+        floors = sorted(args.floors)
     else:
         # enable slicing and automatic floor detection
-        floors = get_clustered_floor_heights(zheights, args.params)
+        floors = get_clustered_floor_heights(zheights, args)
 
     drawing_xs = xs if projection_axis in ['y', 'z'] else ys
     drawing_ys = zs if projection_axis in ['x', 'y'] else ys
@@ -129,9 +132,7 @@ def convert(bsp_file, svg_file, args):
 
     dwg_tuples = []
     for i in range(len(floors)):
-        group = dwg.g(
-            id='bsp_ref_%i' % i,
-        )
+        group = dwg.g(id=f'bsp_ref_{i}')
         dwg.defs.add(group)
         dwg_tuples.append((floors[i], group))
 
@@ -194,12 +195,10 @@ def convert(bsp_file, svg_file, args):
         # use multiple shades, from 70% gray to white
         color_val = 70 + 30 * (i+1)/len(dwg_tuples)
 
-        group = dwg.g(
-            id='height_%i' % dwg_tuples[i][0],
-        )
+        group = dwg.g(id=f'height_{dwg_tuples[i][0]}')
         group.add(
             dwg.use(
-                href='#bsp_ref_%i' % i,
+                href=f'#bsp_ref_{i}',
                 fill='none',
                 stroke='black',
                 stroke_width='15',
@@ -208,23 +207,15 @@ def convert(bsp_file, svg_file, args):
         )
         group.add(
             dwg.use(
-                href='#bsp_ref_%i' % i,
+                href=f'#bsp_ref_{i}',
                 fill=svgwrite.rgb(color_val, color_val, color_val, '%'),
                 stroke='black',
                 stroke_width='1'
             )
         )
         dwg.add(group)
-        complete_group_edges.add(
-            dwg.use(
-                href='#bsp_ref_%i' % i,
-            )
-        )
-        complete_group_fill.add(
-            dwg.use(
-                href='#bsp_ref_%i' % i,
-            )
-        )
+        complete_group_edges.add(dwg.use(href=f'#bsp_ref_{i}'))
+        complete_group_fill.add(dwg.use(href=f'#bsp_ref_{i}'))
 
     if len(floors) > 1:
         # only add the complete group if more that one floor was detected / configured
