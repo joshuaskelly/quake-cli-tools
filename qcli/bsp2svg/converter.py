@@ -90,8 +90,16 @@ def convert(bsp_file, svg_file, args):
     # Filter face with type2 plane (axial plane aligned to the z-axis)
     zfaces = list(filter(lambda f: f.plane.type == 2, faces))
     zheights = [int(face.plane.distance) for face in zfaces]
-    # zheights = [vertex[:][2] for face in zfaces for vertex in face.vertexes]
-    floors = args.floors if len(args.floors) > 0 else get_clustered_floor_heights(zheights, args.params)
+    floors = []
+    if args.floors == None:
+        # disable floor slicing - everythig will go on one layer
+        floors = [0]
+    elif len(args.floors) > 0:
+        # enable slicing at user configured levels
+        floors = args.floors
+    else:
+        # enable slicing and automatic floor detection
+        floors = get_clustered_floor_heights(zheights, args.params)
 
     drawing_xs = xs if projection_axis in ['y', 'z'] else ys
     drawing_ys = zs if projection_axis in ['x', 'y'] else ys
@@ -170,6 +178,10 @@ def convert(bsp_file, svg_file, args):
         stroke='black',
         stroke_width='15',
         stroke_miterlimit='0'
+        # stroke_miterlimit defaults to 4
+        # 3 & 4 shows nasty pointy bits on some corners
+        # 2 takes care care of most (but not all) of those bits
+        # 0 & 1 takes care of all bits, but tapers some corners
     )
     complete_group_fill = dwg.g(
         id='complete_fill',
@@ -192,10 +204,6 @@ def convert(bsp_file, svg_file, args):
                 stroke='black',
                 stroke_width='15',
                 stroke_miterlimit='0'
-                # defaults to 4
-                # 3 & 4 shows nasty pointy bits on some corners
-                # 2 takes care care of most (but not all) of those bits
-                # 0 & 1 takes care of all bits, but tapers some corners
             )
         )
         group.add(
@@ -218,13 +226,15 @@ def convert(bsp_file, svg_file, args):
             )
         )
 
-    group = dwg.g(
-        id='complete',
-        display='none',
-    )
-    group.add(complete_group_edges)
-    group.add(complete_group_fill)
-    dwg.add(group)
+    if len(floors) > 1:
+        # only add the complete group if more that one floor was detected / configured
+        group = dwg.g(
+            id='complete',
+            display='none',
+        )
+        group.add(complete_group_edges)
+        group.add(complete_group_fill)
+        dwg.add(group)
 
     print(f'Writing {os.path.basename(svg_file)}')
     dwg.save()
