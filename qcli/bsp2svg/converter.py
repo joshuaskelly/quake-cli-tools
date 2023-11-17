@@ -31,52 +31,67 @@ def convert(bsp_file, svg_file, args):
     """
     print(f'Reading {os.path.basename(bsp_file)}')
     bsp_file = Bsp.open(bsp_file)
+    projection_axis = args.projection_axis
+    
+    # Filter faces
+    faces = [face for model in bsp_file.models for face in model.faces]
+    ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
+    faces = list(filter(lambda f: not (f.texture_name.startswith('sky') or f.texture_name in ignore_textures), faces))
 
     # Determine map bounds
-    vs = [vertex[:] for model in bsp_file.models for face in model.faces for vertex in face.vertexes]
+    vs = [vertex[:] for face in faces for vertex in face.vertexes]
     xs = [v[0] for v in vs]
     ys = [v[1] for v in vs]
+    zs = [v[2] for v in vs]
 
-    min_x = min(xs)
-    max_x = max(xs)
-    min_y = min(ys)
-    max_y = max(ys)
+    drawing_xs = xs if projection_axis in ['y', 'z'] else ys
+    drawing_ys = zs if projection_axis in ['x', 'y'] else ys
+    drawing_min_x = min(drawing_xs)
+    drawing_max_x = max(drawing_xs)
+    drawing_min_y = min(drawing_ys)
+    drawing_max_y = max(drawing_ys)
 
-    width = max_x - min_x
-    height = max_y - min_y
+    width = drawing_max_x - drawing_min_x
+    height = drawing_max_y - drawing_min_y
     padding = min(width // 10, height // 10)
 
     dwg = svgwrite.Drawing(
         svg_file,
-        viewBox=f'{min_x - padding} {min_y - padding} {width + padding * 2} {height + padding * 2}',
+        viewBox=f'{drawing_min_x - padding} {drawing_min_y - padding} {width + padding * 2} {height + padding * 2}',
         profile='tiny'
     )
 
     dwg.add(
         dwg.rect(
-            insert=(min_x - padding, min_y - padding),
+            id='background',
+            insert=(drawing_min_x - padding, drawing_min_y - padding),
             size=(width + padding * 2, height + padding * 2),
             fill='#fff'
         )
     )
 
-    group = dwg.g(
-        id='bsp_ref',
-    )
+    group = dwg.g(id='bsp_ref')
     dwg.defs.add(group)
-
-    ignore_textures = ['clip', 'hint', 'trigger'] + args.ignore
-    faces = [face for model in bsp_file.models for face in model.faces]
-    faces.sort(key=lambda f: f.vertexes[0].z)
+    
+    if projection_axis == 'x':
+        faces.sort(key=lambda f: f.vertexes[0].x)
+    elif projection_axis == 'y':
+        faces.sort(key=lambda f: f.vertexes[0].y)
+    elif projection_axis == 'z':
+        faces.sort(key=lambda f: f.vertexes[0].z)
+    
+    def vs_picker(vertexes):
+        if projection_axis == 'x':
+            return vertexes[1:3]
+        elif projection_axis == 'y':
+            return vertexes[0], vertexes[2]
+        elif projection_axis == 'z':
+            return vertexes[:2]
 
     for face in IncrementalBar('Converting', suffix='%(index)d/%(max)d [%(elapsed_td)s / %(eta_td)s]').iter(faces):
-        texture_name = face.texture_name
-        if texture_name.startswith('sky') or texture_name in ignore_textures:
-            continue
-
         # Process the vertices into points
-        points = [v[:2] for v in face.vertexes]
-        points = list(map(lambda p: (p[0], max_y - p[1] + min_y), points))
+        points = [vs_picker(v) for v in face.vertexes]
+        points = list(map(lambda p: (p[0], drawing_max_y - p[1] + drawing_min_y), points))
         points = [tuple(map(simplify_number, p)) for p in points]
 
         # Draw the polygon
@@ -87,7 +102,12 @@ def convert(bsp_file, svg_file, args):
             href='#bsp_ref',
             fill='none',
             stroke='black',
-            stroke_width='15'
+            stroke_width='15',
+            stroke_miterlimit='0'
+            # stroke_miterlimit defaults to 4
+            # 3 & 4 shows nasty pointy bits on some corners
+            # 2 takes care care of most (but not all) of those bits
+            # 0 & 1 takes care of all bits, but tapers some corners
         )
     )
 

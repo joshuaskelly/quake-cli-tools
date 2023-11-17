@@ -1,4 +1,4 @@
-"""Command line utility for creating and creating WAD files from BSP files
+"""Command line utility for creating SVG files from BSP files
 
 Supported Games:
     - QUAKE
@@ -40,6 +40,14 @@ def main():
     )
 
     parser.add_argument(
+        '-p', '--projection-axis',
+        dest='projection_axis',
+        choices=['x', 'y', 'z'],
+        default='z',
+        help='projection axis. "z" (default) will create a top down view, "x" and "y" will create a frontal and lateral view'
+    )
+
+    parser.add_argument(
         '-i', '--ignore',
         dest='ignore',
         metavar='name',
@@ -71,7 +79,7 @@ def main():
     # Validate or create out file
     if args.dest == os.getcwd():
         svg_path = os.path.dirname(args.file)
-        svg_name = f'{os.path.basename(args.file).split(".")[0]}.svg'
+        svg_name = f'{os.path.basename(args.file).split(".")[0]}_{args.projection_axis}.svg'
         args.dest = os.path.join(svg_path, svg_name)
 
     dest_dir = os.path.dirname(args.dest) or '.'
