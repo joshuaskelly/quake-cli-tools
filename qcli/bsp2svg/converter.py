@@ -149,7 +149,7 @@ def convert(bsp_file, svg_file, args):
         if projection_axis == 'x':
             return vertexes[1:3]
         elif projection_axis == 'y':
-            return [vertexes[0], vertexes[2]]
+            return vertexes[0], vertexes[2]
         elif projection_axis == 'z':
             return vertexes[:2]
 
