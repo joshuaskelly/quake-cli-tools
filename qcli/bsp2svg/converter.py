@@ -55,11 +55,14 @@ def get_clustered_slices(values, args):
             slices_merged.append(slice_distance)
         crt_distance = slice_distance
 
-    top_height = values_sorted[len(values) - 1]
+    bottom_slice = values_sorted[0]
+    top_slice = values_sorted[len(values) - 1]
     if not args.quiet:
-        print(f'will also include bottom and ceiling: {values_sorted[0]}, {top_height}')
-    slices_merged.insert(0, values_sorted[0])
-    slices_merged.append(top_height)
+        print(f'will also include bottom and top: {bottom_slice}, {top_slice}')
+    if slices_merged[0] != bottom_slice:
+        slices_merged.insert(0, bottom_slice)
+    if slices_merged[len(slices_merged) - 1] != top_slice:
+        slices_merged.append(top_slice)
     if not args.quiet:
         print(f'slices after merging: {slices_merged}')
 
