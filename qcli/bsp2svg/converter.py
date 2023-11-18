@@ -178,7 +178,7 @@ def convert(bsp_file, svg_file, args):
             # if a face was not added until this point, it goes into to the last group
             last_tuple = dwg_tuples[len(dwg_tuples) - 1]
             last_tuple[1].add(dwg.polygon(points))
-    
+
     complete_group_edges = dwg.g(
         id='complete_edges',
         fill='none',
@@ -197,6 +197,7 @@ def convert(bsp_file, svg_file, args):
         stroke_width='1',
         stroke_miterlimit='0'
     )
+
     for i in range(len(dwg_tuples)):
         # use multiple shades, from 70% gray to white
         color_val = 70 + 30 * (i+1)/len(dwg_tuples)

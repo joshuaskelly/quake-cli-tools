@@ -105,8 +105,8 @@ def main():
     # Validate or create out file
     if args.dest == os.getcwd():
         svg_path = os.path.dirname(args.file)
-        svg_suffix = f"_{args.projection_axis}_{args.slicing_axis or args.projection_axis}" if args.slices != None else ""
-        svg_name = f'{os.path.basename(args.file).split(".")[0]}{svg_suffix}.svg'
+        svg_suffix = f"_{args.slicing_axis or args.projection_axis}" if args.slices != None else ""
+        svg_name = f'{os.path.basename(args.file).split(".")[0]}_{args.projection_axis}{svg_suffix}.svg'
         args.dest = os.path.join(svg_path, svg_name)
 
     dest_dir = os.path.dirname(args.dest) or '.'
