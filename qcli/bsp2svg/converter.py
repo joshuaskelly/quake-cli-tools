@@ -162,6 +162,7 @@ def convert(bsp_file, svg_file, args):
         was_added = False
         # Find the correct layer to draw on, based on distance
         for i in range(len(dwg_tuples) - 1):
+            crt_face_dist = 0
             if slicing_axis == 'x':
                 crt_face_dist = face.vertexes[0].x
             elif slicing_axis == 'y':
