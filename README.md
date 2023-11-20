@@ -7,7 +7,7 @@
 quake-cli-tools is a set of command line tools for creating Quake content.
 
 ## Installation
-```shell
+```sh
 $ pip install quake-cli-tools
 ```
 
@@ -22,13 +22,40 @@ $ pip install quake-cli-tools
 - _spr2image_: Extract frames from an SPR.
 - _bsp2svg_: Create an SVG file from a BSP file.
 
+## Building
+Below is an example of how to build binaries for all tools. The out put will be placed in the `dist` directory.
+
+1. Install Project Dependencies
+```sh
+pip install -r requirements.txt
+```
+
+2. Install Development Dependencies
+```sh
+pip install -r requirements-dev.txt
+```
+
+3. Build All Binaries
+```sh
+make build
+```
+
 ## Contributing
 Have a bug fix or a new feature you'd like to see in quake-cli-tools? Send it our way! Please make sure you create an issue that addresses your fix/feature so we can discuss the contribution.
 
 1. Fork this repo!
-2. Create your feature branch: `git checkout -b features/add-cool-new-tool`
-3. Commit your changes: `git commit -m 'Adding must have new tool!'`
-4. Push the branch: `git push origin features/add-cool-new-tool`
+2. Create your feature branch:
+```sh
+git checkout -b features/add-cool-new-tool
+```
+3. Commit your changes:
+```sh
+git commit -m 'Adding must have new tool!'
+```
+4. Push the branch:
+```sh
+git push origin features/add-cool-new-tool
+```
 5. Submit a pull request.
 6. Create an [issue](https://github.com/joshuaskelly/wick/issues/new).
 
