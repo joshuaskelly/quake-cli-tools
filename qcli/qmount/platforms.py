@@ -29,45 +29,39 @@ def temp_volume(name):
         A path to the created volume.
     """
 
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         disk_name = name.upper()
-        td = f'/Volumes/{disk_name}'
+        td = f"/Volumes/{disk_name}"
 
         if os.path.exists(td):
-            subprocess.run(f'diskutil unmount {td}', shell=True)
+            subprocess.run(f"diskutil unmount {td}", shell=True)
 
-        print('Mounting {0} to {1}'.format(name, td))
+        print("Mounting {0} to {1}".format(name, td))
         subprocess.run(
             f"diskutil erasevolume HFS+ '{disk_name}' `hdiutil attach -nomount ram://262144`",
             stdout=subprocess.DEVNULL,
-            shell=True
+            shell=True,
         )
 
         return td
 
-    elif sys.platform == 'win32':
+    elif sys.platform == "win32":
         td = tempfile.mkdtemp()
-        drive = 'Q:\\'
+        drive = "Q:\\"
 
         if os.path.exists(drive):
             subprocess.run(
-                f'subst /D {drive[:2]}',
-                stdout=subprocess.DEVNULL,
-                shell=True
+                f"subst /D {drive[:2]}", stdout=subprocess.DEVNULL, shell=True
             )
 
-        print(f'Mounting {name} to {drive}')
-        subprocess.run(
-            f'subst Q: {td}',
-            stdout=subprocess.DEVNULL,
-            shell=True
-        )
+        print(f"Mounting {name} to {drive}")
+        subprocess.run(f"subst Q: {td}", stdout=subprocess.DEVNULL, shell=True)
 
         return drive
 
     else:
         td = tempfile.mkdtemp()
-        print(f'Mounting {name} to {td}')
+        print(f"Mounting {name} to {td}")
 
         return td
 
@@ -90,22 +84,16 @@ def unmount_temp_volume(path):
         path: The path to the volume to unmount.
     """
 
-    if sys.platform == 'darwin':
+    if sys.platform == "darwin":
         if os.path.exists(path):
             subprocess.run(
-                f'diskutil unmount {path}',
-                stdout=subprocess.DEVNULL,
-                shell=True
+                f"diskutil unmount {path}", stdout=subprocess.DEVNULL, shell=True
             )
 
-    elif sys.platform == 'win32':
+    elif sys.platform == "win32":
         if os.path.exists(path):
             shutil.rmtree(path)
-            subprocess.run(
-                'subst /D Q:',
-                stdout=subprocess.DEVNULL,
-                shell=True
-            )
+            subprocess.run("subst /D Q:", stdout=subprocess.DEVNULL, shell=True)
 
     else:
         shutil.rmtree(path)
@@ -117,26 +105,18 @@ def open_file_browser(path):
     Args:
         path: The location to be opened.
     """
-    if sys.platform == 'darwin':
-        subprocess.run(
-            f'open {path}',
-            stdout=subprocess.DEVNULL,
-            shell=True
-        )
+    if sys.platform == "darwin":
+        subprocess.run(f"open {path}", stdout=subprocess.DEVNULL, shell=True)
 
-    elif sys.platform == 'win32':
-        subprocess.run(
-            f'start {path}',
-            stdout=subprocess.DEVNULL,
-            shell=True
-        )
+    elif sys.platform == "win32":
+        subprocess.run(f"start {path}", stdout=subprocess.DEVNULL, shell=True)
 
-    elif sys.platform == 'linux':
+    elif sys.platform == "linux":
         subprocess.run(
-            f'xdg-open {path}',
+            f"xdg-open {path}",
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            shell=True
+            shell=True,
         )
 
     else:

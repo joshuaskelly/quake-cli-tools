@@ -16,40 +16,56 @@ class TempPakFileHandler(Handler):
         self.verbose = verbose
 
     def on_modified(self, event):
-        self.context['dirty'] = True
+        self.context["dirty"] = True
 
         if self.verbose:
-            print('{0} modified'.format(os.path.relpath(event.src_path, self.working_directory)))
+            print(
+                "{0} modified".format(
+                    os.path.relpath(event.src_path, self.working_directory)
+                )
+            )
 
         rel_path = os.path.relpath(event.src_path, self.working_directory)
-        with open(event.src_path, 'rb') as file:
+        with open(event.src_path, "rb") as file:
             self.files[rel_path] = file.read()
 
     def on_created(self, event):
-        self.context['dirty'] = True
+        self.context["dirty"] = True
 
         if self.verbose:
-            print('{0} created'.format(os.path.relpath(event.src_path, self.working_directory)))
+            print(
+                "{0} created".format(
+                    os.path.relpath(event.src_path, self.working_directory)
+                )
+            )
 
         rel_path = os.path.relpath(event.src_path, self.working_directory)
 
-        with open(event.src_path, 'rb') as file:
+        with open(event.src_path, "rb") as file:
             self.files[rel_path] = file.read()
 
     def on_deleted(self, event):
-        self.context['dirty'] = True
+        self.context["dirty"] = True
 
         if self.verbose:
-            print('{0} deleted'.format(os.path.relpath(event.src_path, self.working_directory)))
+            print(
+                "{0} deleted".format(
+                    os.path.relpath(event.src_path, self.working_directory)
+                )
+            )
 
         rel_path = os.path.relpath(event.src_path, self.working_directory)
         self.files.pop(rel_path, None)
 
     def on_moved(self, event):
-        self.context['dirty'] = True
+        self.context["dirty"] = True
 
         if self.verbose:
-            print('{0} moved'.format(os.path.relpath(event.src_path, self.working_directory)))
+            print(
+                "{0} moved".format(
+                    os.path.relpath(event.src_path, self.working_directory)
+                )
+            )
 
         rel_src_path = os.path.relpath(event.src_path, self.working_directory)
         rel_dest_path = os.path.relpath(event.dest_path, self.working_directory)

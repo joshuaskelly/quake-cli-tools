@@ -18,59 +18,58 @@ from qcli.common import Parser, ResolvePathAction, read_from_stdin
 
 def main():
     parser = Parser(
-        prog='bsp2wad',
-        description='Default action is to create a wad archive from '
-                    'miptextures extracted from the given bsp file.'
-                    '\nIf list is omitted, pak will use stdin.',
-        epilog='example: bsp2wad e1m1.bsp => creates the wad file e1m1.wad'
+        prog="bsp2wad",
+        description="Default action is to create a wad archive from "
+        "miptextures extracted from the given bsp file."
+        "\nIf list is omitted, pak will use stdin.",
+        epilog="example: bsp2wad e1m1.bsp => creates the wad file e1m1.wad",
     )
 
     parser.add_argument(
-        'list',
-        nargs='*',
-        action=ResolvePathAction,
-        default=read_from_stdin()
+        "list", nargs="*", action=ResolvePathAction, default=read_from_stdin()
     )
 
     parser.add_argument(
-        '-d',
-        metavar='file.wad',
-        dest='dest',
+        "-d",
+        metavar="file.wad",
+        dest="dest",
         default=os.getcwd(),
         action=ResolvePathAction,
-        help='wad file to create'
+        help="wad file to create",
     )
 
-    parser.add_argument(
-        '-q',
-        dest='quiet',
-        action='store_true',
-        help='quiet mode'
-    )
+    parser.add_argument("-q", dest="quiet", action="store_true", help="quiet mode")
 
     parser.add_argument(
-        '-v', '--version',
-        dest='version',
-        action='version',
+        "-v",
+        "--version",
+        dest="version",
+        action="version",
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.__version__}'
+        version=f"{parser.prog} version {qcli.__version__}",
     )
 
     args = parser.parse_args()
 
     if not args.list:
-        parser.error('the following arguments are required: list')
+        parser.error("the following arguments are required: list")
 
     miptextures = []
 
     for file in args.list:
         if not bsp.is_bspfile(file):
-            print('{0}: cannot find or open {1}'.format(parser.prog, file),
-                  file=sys.stderr)
+            print(
+                "{0}: cannot find or open {1}".format(parser.prog, file),
+                file=sys.stderr,
+            )
             continue
 
         bsp_file = bsp.Bsp.open(file)
-        miptextures += [mip for mip in bsp_file.miptextures if mip and mip.name not in [n.name for n in miptextures]]
+        miptextures += [
+            mip
+            for mip in bsp_file.miptextures
+            if mip and mip.name not in [n.name for n in miptextures]
+        ]
 
     if args.dest == os.getcwd():
         wad_path = os.path.dirname(file)
@@ -79,17 +78,17 @@ def main():
             wad_name = f'{os.path.basename(file).split(".")[0]}.wad'
 
         else:
-            wad_name = 'out.wad'
+            wad_name = "out.wad"
 
         args.dest = os.path.join(wad_path, wad_name)
 
-    dir = os.path.dirname(args.dest) or '.'
+    dir = os.path.dirname(args.dest) or "."
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-    with wad.WadFile(args.dest, mode='w') as wad_file:
+    with wad.WadFile(args.dest, mode="w") as wad_file:
         if not args.quiet:
-            print(f'Archive: {os.path.basename(args.dest)}')
+            print(f"Archive: {os.path.basename(args.dest)}")
 
         for miptex in miptextures:
             if not miptex:
@@ -106,12 +105,12 @@ def main():
             info.type = wad.LumpType.MIPTEX
 
             if not args.quiet:
-                print(f' adding: {info.filename}')
+                print(f" adding: {info.filename}")
 
             wad_file.writestr(info, buff)
 
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

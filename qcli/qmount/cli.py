@@ -29,48 +29,44 @@ def main():
     signal.signal(signal.SIGINT, handleSIGINT)
 
     parser = Parser(
-        prog='qmount',
-        description='Default action is to mount the given pak file as a logical volume.',
-        epilog='example: qmount TEST.PAK => mounts TEST.PAK as a logical volume.'
+        prog="qmount",
+        description="Default action is to mount the given pak file as a logical volume.",
+        epilog="example: qmount TEST.PAK => mounts TEST.PAK as a logical volume.",
     )
 
     parser.add_argument(
-        'file',
-        metavar='file.pak',
-        action=ResolvePathAction,
-        help='pak file to mount'
+        "file", metavar="file.pak", action=ResolvePathAction, help="pak file to mount"
     )
 
     parser.add_argument(
-        '-f', '--file-browser',
-        dest='open_file_browser',
-        action='store_true',
-        help='opens a file browser once mounted'
+        "-f",
+        "--file-browser",
+        dest="open_file_browser",
+        action="store_true",
+        help="opens a file browser once mounted",
     )
 
     parser.add_argument(
-        '--verbose',
-        dest='verbose',
-        action='store_true',
-        help='verbose mode'
+        "--verbose", dest="verbose", action="store_true", help="verbose mode"
     )
 
     parser.add_argument(
-        '-v', '--version',
-        dest='version',
-        action='version',
+        "-v",
+        "--version",
+        dest="version",
+        action="version",
         help=argparse.SUPPRESS,
-        version=f'{parser.prog} version {qcli.__version__}'
+        version=f"{parser.prog} version {qcli.__version__}",
     )
 
     args = parser.parse_args()
 
-    dir = os.path.dirname(args.file) or '.'
+    dir = os.path.dirname(args.file) or "."
     if not os.path.exists(dir):
         os.makedirs(dir)
 
     archive_name = os.path.basename(args.file)
-    context = {'dirty': False}
+    context = {"dirty": False}
     files = {}
 
     # If the pak file exists put the contents into the file dictionary
@@ -81,7 +77,7 @@ def main():
                 files[name] = pak_file.read(name)
 
     else:
-        context['dirty'] = True
+        context["dirty"] = True
 
     temp_directory = platforms.temp_volume(archive_name)
 
@@ -93,7 +89,7 @@ def main():
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-        with open(abs_path, 'wb') as out_file:
+        with open(abs_path, "wb") as out_file:
             out_file.write(files[filename])
 
     # Open a native file browser
@@ -107,15 +103,12 @@ def main():
         temp_directory,
         files,
         args.verbose,
-        ignore_patterns=[
-            '*/.DS_Store',
-            '*/Thumbs.db'
-        ],
-        ignore_directories=True
+        ignore_patterns=["*/.DS_Store", "*/Thumbs.db"],
+        ignore_directories=True,
     )
     observer.schedule(handler, path=temp_directory, recursive=True)
 
-    print('Press Ctrl+C to save and quit')
+    print("Press Ctrl+C to save and quit")
 
     observer.start()
 
@@ -140,15 +133,15 @@ def main():
     observer.join()
 
     # Write out updated files
-    if context['dirty']:
-        print(f'Updating changes to {archive_name}')
+    if context["dirty"]:
+        print(f"Updating changes to {archive_name}")
 
-        with pak.PakFile(args.file, 'w') as pak_file:
+        with pak.PakFile(args.file, "w") as pak_file:
             for filename in files:
                 pak_file.writestr(filename, files[filename])
 
     else:
-        print(f'No changes detected to {archive_name}')
+        print(f"No changes detected to {archive_name}")
 
     # Clean up temp directory
     platforms.unmount_temp_volume(temp_directory)
@@ -156,5 +149,5 @@ def main():
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
