@@ -1,4 +1,4 @@
-.PHONY: install uninstall reinstall test clean bsp2svg bsp2wad image2spr pak qmount spr2image unpak unwad wad
+.PHONY: install uninstall reinstall test clean bsp2svg bsp2wad gif2spr pak qmount spr2gif unpak unwad wad
 
 install:
 	pip install .
@@ -19,7 +19,7 @@ publish-test:
 package:
 	python package.py
 
-build: bsp2svg bsp2wad image2spr pak qmount spr2image unpak unwad wad
+build: bsp2svg bsp2wad gif2spr pak qmount spr2gif unpak unwad wad
 
 bsp2svg:
 	pyinstaller --name=bsp2svg ./qcli/bsp2svg/cli.py
@@ -27,8 +27,8 @@ bsp2svg:
 bsp2wad:
 	pyinstaller --name=bsp2wad ./qcli/bsp2wad/cli.py
 
-image2spr:
-	pyinstaller --name=image2spr ./qcli/image2spr/cli.py --exclude=numpy
+gif2spr:
+	pyinstaller --name=gif2spr ./qcli/gif2spr/cli.py --exclude=numpy
 
 pak:
 	pyinstaller --name=pak ./qcli/pak/cli.py
@@ -36,8 +36,8 @@ pak:
 qmount:
 	pyinstaller --name=qmount ./qcli/qmount/cli.py
 
-spr2image:
-	pyinstaller --name=spr2image ./qcli/spr2image/cli.py --exclude=numpy
+spr2gif:
+	pyinstaller --name=spr2gif ./qcli/spr2gif/cli.py --exclude=numpy
 
 unpak:
 	pyinstaller --name=unpak ./qcli/unpak/cli.py

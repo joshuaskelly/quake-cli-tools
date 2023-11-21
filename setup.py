@@ -28,10 +28,10 @@ setup(
         'console_scripts': [
             'bsp2svg=qcli.bsp2svg.cli:main',
             'bsp2wad=qcli.bsp2wad.cli:main',
-            'image2spr=qcli.image2spr.cli:main',
+            'gif2spr=qcli.gif2spr.cli:main',
             'pak=qcli.pak.cli:main',
             'qmount=qcli.qmount.cli:main',
-            'spr2image=qcli.spr2image.cli:main',
+            'spr2gif=qcli.spr2gif.cli:main',
             'wad=qcli.wad.cli:main',
             'unpak=qcli.unpak.cli:main',
             'unwad=qcli.unwad.cli:main',
