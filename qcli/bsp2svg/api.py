@@ -9,22 +9,22 @@ def dot(v0, v1):
 
 
 def cross(v0, v1):
-    return v0[1] * v1[2] - v0[2] * v1[1], \
-           v0[2] * v1[0] - v0[0] * v1[2], \
-           v0[0] * v1[1] - v0[1] * v1[0]
+    return (
+        v0[1] * v1[2] - v0[2] * v1[1],
+        v0[2] * v1[0] - v0[0] * v1[2],
+        v0[0] * v1[1] - v0[1] * v1[0],
+    )
 
 
 def subtract(v0, v1):
     return v0[0] - v1[0], v0[1] - v1[1], v0[2] - v1[2]
 
 
-__all__ = ['Bsp']
+__all__ = ["Bsp"]
 
 
 class Bsp(object):
-    __slots__ = (
-        'models'
-    )
+    __slots__ = "models"
 
     def __init__(self, models):
         self.models = models
@@ -53,7 +53,7 @@ class Bsp(object):
         def process_face(face_index):
             edges = get_edges(face_index)
             vertexes = get_vertexes(face_index)
-            uvs = []#get_uvs(face_index)
+            uvs = []  # get_uvs(face_index)
             plane = get_plane(face_index)
             texture_name = get_texture_name(face_index)
 
@@ -93,18 +93,18 @@ class Bsp(object):
         @lru_cache(maxsize=None)
         def get_texture_name(face_index):
             if face_index == -1:
-                return ''
-            
+                return ""
+
             bsp_face = bsp_file.faces[face_index]
 
             if bsp_face.texture_info == -1:
-                return ''
+                return ""
 
             tex_info = bsp_file.texture_infos[bsp_face.texture_info]
             miptex = bsp_file.miptextures[tex_info.miptexture_number]
 
             if not miptex:
-                return ''
+                return ""
 
             return miptex.name
 
@@ -141,9 +141,7 @@ class Bsp(object):
 
 
 class Model(object):
-    __slots__ = (
-        'faces'
-    )
+    __slots__ = "faces"
 
     def __init__(self, faces):
         self.faces = faces
@@ -160,13 +158,7 @@ class Model(object):
 
 
 class Face(object):
-    __slots__ = (
-        'vertexes',
-        'edges',
-        'uvs',
-        'plane',
-        'texture_name'
-    )
+    __slots__ = ("vertexes", "edges", "uvs", "plane", "texture_name")
 
     def __init__(self, vertexes, edges, uvs, plane, texture_name):
         self.vertexes = vertexes
@@ -176,15 +168,11 @@ class Face(object):
         self.texture_name = texture_name
 
 
-Edge = namedtuple('Edge', ['vertex_0', 'vertex_1'])
+Edge = namedtuple("Edge", ["vertex_0", "vertex_1"])
 
 
 class Vertex(object):
-    __slots__ = (
-        'x',
-        'y',
-        'z'
-    )
+    __slots__ = ("x", "y", "z")
 
     def __init__(self, x, y, z):
         self.x = x

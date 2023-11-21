@@ -1,23 +1,30 @@
 .PHONY: install uninstall reinstall test clean bsp2svg bsp2wad image2spr pak qmount spr2image unpak unwad wad
 
+prepare:
+	pip3 install -r requirements-dev.txt
+	pip3 install -r requirements.txt
+
+format:
+	python3 -m black ./
+
 install:
-	pip install .
+	pip3 install .
 
 uninstall:
-	pip uninstall quake-cli-tools -y
+	pip3 uninstall quake-cli-tools -y
 
 reinstall: uninstall install
 
 publish:
-	python setup.py sdist
+	python3 setup.py sdist
 	twine upload dist/*
 
 publish-test:
-	python setup.py sdist
-	python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	python3 setup.py sdist
+	python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 package:
-	python package.py
+	python3 package.py
 
 build: bsp2svg bsp2wad image2spr pak qmount spr2image unpak unwad wad
 
@@ -47,9 +54,6 @@ unwad:
 
 wad:
 	pyinstaller --name=wad ./qcli/wad/cli.py --exclude=numpy
-
-test:
-	python -m unittest discover -s tests
 
 clean:
 	find . -name "*.pyc" -delete

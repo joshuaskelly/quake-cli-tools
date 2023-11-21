@@ -8,17 +8,14 @@ import zipfile
 import qcli
 
 # Don't attempt to package if nothing has been built
-if not os.path.exists('./dist'):
-    print('No dist directory to package.', file=sys.stderr)
+if not os.path.exists("./dist"):
+    print("No dist directory to package.", file=sys.stderr)
     sys.exit(1)
 
 # Get short name for platform
-platform = {
-    'win32': 'windows',
-    'darwin': 'macos'
-}.get(sys.platform, sys.platform)
+platform = {"win32": "windows", "darwin": "macos"}.get(sys.platform, sys.platform)
 
-package_name = f'quake-cli-tools-{qcli.__version__}-{platform}'
+package_name = f"quake-cli-tools-{qcli.__version__}-{platform}"
 
 # Create a mapping of internal zip archive names to external relative paths
 archive_files = {}
@@ -38,11 +35,11 @@ for root, dirs, files in os.walk("./dist"):
 
 # Don't attempt to package if no build artifacts
 if not archive_files:
-    print('Nothing in dist directory to package.', file=sys.stderr)
+    print("Nothing in dist directory to package.", file=sys.stderr)
     sys.exit(1)
 
 # Write files to zip archive
-with zipfile.ZipFile(f'{package_name}.zip', 'w') as zip_file:
+with zipfile.ZipFile(f"{package_name}.zip", "w") as zip_file:
     for arcname, filename in archive_files.items():
         zip_file.write(filename, arcname=arcname)
 

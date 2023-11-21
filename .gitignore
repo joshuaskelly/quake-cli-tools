@@ -21,3 +21,6 @@
 
 # No compiled Python artifacts
 *.pyc
+
+# Ignore packed binaries
+quake-cli-tools-*.zip
