@@ -1,4 +1,4 @@
-"""Command line utility for creating and creating SPR files from image files
+"""Command line utility for creating SPR files from GIF files
 
 Supported Games:
     - QUAKE
@@ -21,10 +21,10 @@ from qcli.common import read_from_stdin
 
 def main():
     parser = Parser(
-        prog='image2spr',
+        prog='gif2spr',
         description='Default action is to convert an image file(s) to an '
-            'spr.\nIf image file is omitted, image2spr will use stdin.',
-        epilog='example: image2spr anim.spr anim.gif => converts anim.gif to '
+            'spr.\nIf image file is omitted, gif2spr will use stdin.',
+        epilog='example: gif2spr anim.spr anim.gif => converts anim.gif to '
             'anim.spr'
     )
 
@@ -86,7 +86,6 @@ def main():
         # Open source image
         source_image = Image.open(source_file)
         size = source_image.size
-        source_mode = source_image.mode
         global_transparency = source_image.info.get('transparency')
 
         # Decompose the source image frames into a sequence of images

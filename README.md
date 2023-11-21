@@ -18,8 +18,8 @@ $ pip install quake-cli-tools
 - _unwad_: Extract files from a WAD file.
 - _bsp2wad_: Create a WAD file from a BSP file.
 - _qmount_: Mount a PAK file as a drive.
-- _image2spr_: Create an SPR from image files.
-- _spr2image_: Extract frames from an SPR.
+- _gif2spr_: Create an SPR from image files.
+- _spr2gif_: Extract frames from an SPR.
 - _bsp2svg_: Create an SVG file from a BSP file.
 
 ## Building

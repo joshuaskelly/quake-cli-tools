@@ -1,4 +1,4 @@
-"""Command line utility for creating and creating image files from SPR files
+"""Command line utility for creating GIF files from SPR files
 
 Supported Games:
     - QUAKE
@@ -19,9 +19,9 @@ from qcli.common import ResolvePathAction
 
 def main():
     parser = Parser(
-        prog='spr2image',
+        prog='spr2gif',
         description='Default action is to convert a spr file to a gif.',
-        epilog='example: spr2image bubble.spr => convert bubble.spr to bubble.gif'
+        epilog='example: spr2gif bubble.spr => convert bubble.spr to bubble.gif'
     )
 
     parser.add_argument(
@@ -111,7 +111,6 @@ def main():
             duration=default_duration,
             loop=0,
             optimize=False,
-            #transparency=255,
             palette=palette
         )
 
@@ -123,7 +122,6 @@ def main():
             image.save(
                 os.path.join(image_directory, filename),
                 optimize=False,
-                #transparency=255,
                 palette=palette
             )
 
