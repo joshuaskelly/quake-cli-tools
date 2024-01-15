@@ -10,6 +10,9 @@
 /build
 *.egg-info
 
+# Ignore PyInstaller artifacts
+*.spec
+
 # Ignore OS artifacts
 .DS_Store
 
